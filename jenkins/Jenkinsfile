@@ -11,9 +11,7 @@ pipeline {
     OC_TOKEN = credentials('openshift_id')  // Jenkins credentials
     OC_SERVER = "https://api.rm1.0a51.p1.openshiftapps.com:6443"
     PROJECT = "salimmjalloh46-dev"
-    // IMAGE_NAME = "salimvirgo/dockerchallenge:latest"
-    IMAGE_NAME = "salimvirgo/dockerchallenge"
-    IMAGE_TAG = "latest"
+    IMAGE_NAME = "salimvirgo/dockerchallenge:latest"
     APP_NAME = "web-terminal-tooling" 
     APP_DEPLOYMENT = "workspacea190f5fcf8534249"
 }
@@ -35,32 +33,24 @@ pipeline {
         //         }
         //     }
         // }
-        // stage('Build Docker Image') {
-        //     steps {
-        //         sh 'sudo docker build --no-cache -t ${IMAGE_NAME}:${IMAGE_TAG} .'
-        //     }
-        // }
+       
 
          stage('Trivy Security Scan') {
             steps {
-                script {
-                    def fullImage = "${IMAGE_NAME}:${IMAGE_TAG}"
-                    sh """
-                    sudo docker run --rm \
-                    -v /var/run/docker.sock:/var/run/docker.sock \
-                    -v \$PWD:/root/reports \
-                    aquasec/trivy image \
-                    --format template \
-                    --template '@contrib/html.tpl' \
-                    --exit-code 1 \
-                    --severity MEDIUM,HIGH,CRITICAL \
-                    -o /root/reports/trivy-report.html \
-                    ${fullImage}
-                    """
-                }
+                sh '''
+                sudo docker run --rm \
+                -v /var/run/docker.sock:/var/run/docker.sock \
+                -v $PWD:/root/reports \
+                aquasec/trivy image \
+                --format template \
+                --template "@/contrib/html.tpl" \
+                --exit-code 1 \
+                --severity MEDIUM,HIGH,CRITICAL \
+                -o /root/reports/trivy-report.html \
+                ${IMAGE_NAME}
+                '''
             }
         }
-
 
  
 
@@ -81,8 +71,7 @@ pipeline {
         stage('Deploy Application') {
             steps {
                 script {
-                    def FULL_IMAGE = "${IMAGE_NAME}:${IMAGE_TAG}"
-                    OpenShiftHelper.deployDeployment(this, PROJECT, FULL_IMAGE, APP_NAME, APP_DEPLOYMENT)
+                    OpenShiftHelper.deployDeployment(this, PROJECT, IMAGE_NAME, APP_NAME, APP_DEPLOYMENT)
                 }
             }
         }
