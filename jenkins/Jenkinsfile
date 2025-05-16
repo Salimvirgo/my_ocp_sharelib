@@ -10,8 +10,8 @@ pipeline {
     environment {
         OC_TOKEN = credentials('openshift-id')  // Jenkins credentials
         OC_SERVER = "https://api.rm3.7wse.p1.openshiftapps.com:6443"
-        PROJECT = "moussacloudwade-dev"
-        IMAGE = "dockermoisa/challengewebapp:latest"
+        PROJECT = "strangecloudwade-dev"
+        IMAGE = "salimvirgo/challengewebapp:latest"
         APP_NAME = "labisi2025"
         APP_DEPLOYMENT = "labisi2025-00001-deployment"
     }
