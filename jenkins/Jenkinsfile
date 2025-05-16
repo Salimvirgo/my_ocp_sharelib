@@ -11,9 +11,9 @@ pipeline {
     OC_TOKEN = credentials('openshift_id')  // Jenkins credentials
     OC_SERVER = "https://api.rm1.0a51.p1.openshiftapps.com:6443"
     PROJECT = "salimmjalloh46-dev"
-    IMAGE = "salimvirgo/dockerchallenge:latest"
-    // IMAGE_NAME = "salimvirgo/dockerchallenge"
-    // IMAGE_TAG = "latest"
+    // IMAGE = "salimvirgo/dockerchallenge:latest"
+    IMAGE_NAME = "salimvirgo/dockerchallenge"
+    IMAGE_TAG = "latest"
     APP_NAME = "web-terminal-tooling" 
     APP_DEPLOYMENT = "workspacea190f5fcf8534249"
 }
@@ -41,43 +41,44 @@ pipeline {
         //     }
         // }
 
-        //  stage('Trivy Security Scan') {
-        //     steps {
-        //         sh '''
-        //         sudo docker run --rm \
-        //         -v /var/run/docker.sock:/var/run/docker.sock \
-        //         -v $PWD:/root/reports \
-        //         aquasec/trivy image \
-        //         --format template \
-        //         --template "@/contrib/html.tpl" \
-        //         --exit-code 1 \
-        //         --severity MEDIUM,HIGH,CRITICAL \
-        //         -o /root/reports/trivy-report.html \
-        //         ${IMAGE_NAME}:${IMAGE_TAG}
-        //         '''
-        //     }
-        // }
+         stage('Trivy Security Scan') {
+            steps {
+                sh '''
+                sudo docker run --rm \
+                -v /var/run/docker.sock:/var/run/docker.sock \
+                -v $PWD:/root/reports \
+                aquasec/trivy image \
+                --format template \
+                --template "@/contrib/html.tpl" \
+                --exit-code 1 \
+                --severity MEDIUM,HIGH,CRITICAL \
+                -o /root/reports/trivy-report.html \
+                ${IMAGE_NAME}:${IMAGE_TAG}
+                '''
+            }
+        }
 
  
 
-        // stage('Publish Trivy Report') {
-        //     steps {
-        //         publishHTML(target: [
-        //         allowMissing: true,
-        //         alwaysLinkToLastBuild: false,
-        //         keepAll: true,
-        //         reportDir: '.',
-        //         reportFiles: 'trivy-report.html',
-        //         reportName: 'Trivy Security Report',
-        //         alwaysLinkToLastBuild: true
-        //         ])
-        //     }
-        // }
+        stage('Publish Trivy Report') {
+            steps {
+                publishHTML(target: [
+                allowMissing: true,
+                alwaysLinkToLastBuild: false,
+                keepAll: true,
+                reportDir: '.',
+                reportFiles: 'trivy-report.html',
+                reportName: 'Trivy Security Report',
+                alwaysLinkToLastBuild: true
+                ])
+            }
+        }
 
         stage('Deploy Application') {
             steps {
                 script {
-                    OpenShiftHelper.deployDeployment(this, PROJECT, IMAGE, APP_NAME, APP_DEPLOYMENT)
+                    def FULL_IMAGE = "${IMAGE_NAME}:${IMAGE_TAG}"
+                    OpenShiftHelper.deployDeployment(this, PROJECT, FULL_IMAGE, APP_NAME, APP_DEPLOYMENT)
                 }
             }
         }
