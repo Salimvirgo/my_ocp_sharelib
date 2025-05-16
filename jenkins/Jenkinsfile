@@ -11,9 +11,9 @@ pipeline {
     OC_TOKEN = credentials('openshift_id')  // Jenkins credentials
     OC_SERVER = "https://api.rm1.0a51.p1.openshiftapps.com:6443"
     PROJECT = "salimmjalloh46-dev"
-    IMAGE_NAME = "salimvirgo/dockerchallenge:latest"
-    // IMAGE_NAME = "salimvirgo/dockerchallenge"
-    // IMAGE_TAG = "latest"
+    // IMAGE_NAME = "salimvirgo/dockerchallenge:latest"
+    IMAGE_NAME = "salimvirgo/dockerchallenge"
+    IMAGE_TAG = "latest"
     APP_NAME = "web-terminal-tooling" 
     APP_DEPLOYMENT = "workspacea190f5fcf8534249"
 }
@@ -77,7 +77,8 @@ pipeline {
         stage('Deploy Application') {
             steps {
                 script {
-                    OpenShiftHelper.deployDeployment(this, PROJECT, IMAGE_NAME, APP_NAME, APP_DEPLOYMENT)
+                    def FULL_IMAGE = "${IMAGE_NAME}:${IMAGE_TAG}"
+                    OpenShiftHelper.deployDeployment(this, PROJECT, FULL_IMAGE, APP_NAME, APP_DEPLOYMENT)
                 }
             }
         }
